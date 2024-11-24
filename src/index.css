@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@media print {
+  /* Hide everything by default */
+  body * {
+    visibility: hidden;
+  }
+  
+  /* Show only the print content */
+  #printable-payment,
+  #printable-payment * {
+    visibility: visible !important;
+  }
+  
+  /* Position the print content at the top of the page */
+  #printable-payment {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+  
+  /* Set page margins */
+  @page {
+    size: A4;
+    margin: 20mm;
+  }
+  
+  /* Hide non-printable elements */
+  .no-print {
+    display: none !important;
+  }
+}
