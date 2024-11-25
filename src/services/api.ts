@@ -167,6 +167,30 @@ export const createGroup = async (groupData) => {
   }
 };
 
+export const updateGroup = async (groupData, id) => {
+  try {
+    const response = await axios.put(
+      `http://167.114.0.177:81/groupes/update/${id}`,
+      groupData,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    if (response.status === 200) {
+      console.log("Group Updated successfully:", response.data);
+      return response.data;
+    } else {
+      console.error("Unexpected response:", response);
+      return null;
+    }
+  } catch (error) {
+    console.error("Error creating group:", error);
+    return null;
+  }
+};
+
 export const createStudent = async (groupData) => {
   try {
     const response = await axios.post(

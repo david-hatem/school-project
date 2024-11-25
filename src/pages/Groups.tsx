@@ -12,6 +12,7 @@ import createGroup, {
   fetchMatiereList,
   fetchNiveauList,
   fetchTeachersList,
+  updateGroup,
 } from "../services/api";
 
 const columns: ColumnDef<Group>[] = [
@@ -116,13 +117,13 @@ const columns: ColumnDef<Group>[] = [
           className="p-1 text-blue-600 hover:text-blue-800"
         >
           <Eye className="w-4 h-4" />
-        </button>
+        </button> */}
         <button
-          onClick={() => row.original.onEdit?.(row.original)}
+          onClick={() => row.original?.onEdit?.(row.original)}
           className="p-1 text-gray-600 hover:text-gray-800"
         >
           <Edit className="w-4 h-4" />
-        </button> */}
+        </button>
         <button
           // onClick={() => row.original.onEdit?.(row.original)}
           onClick={async () => {
@@ -157,18 +158,20 @@ interface GroupFormData {
 function GroupForm({
   onSubmit,
   onClose,
+  initialData,
 }: {
   onSubmit: (data: GroupFormData) => void;
   onClose: () => void;
+  initialData?: Group;
 }) {
   const [formData, setFormData] = useState<GroupFormData>({
-    nom_groupe: "",
-    niveau: 0,
-    filiere: 0,
-    max_etudiants: 30,
-    prix_subscription: 0,
-    professeurs: [],
-    matieres: [],
+    nom_groupe: initialData?.nom_groupe || "",
+    niveau: initialData?.niveau?.id || 0,
+    filiere: initialData?.filiere?.id || 0,
+    max_etudiants: initialData?.max_etudiants || 30,
+    prix_subscription: initialData?.prix_subscription || 0,
+    professeurs: initialData?.professeurs || [],
+    matieres: initialData?.matieres || [],
   });
 
   const [levels, setLevels] = useState<Level[]>([]);
@@ -258,11 +261,13 @@ function GroupForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const createdgrp = await createGroup(formData);
+    const createdgrp = !initialData
+      ? await createGroup(formData)
+      : await updateGroup(formData, initialData?.id);
     onSubmit(formData);
     onClose();
     if (createdgrp) {
-      alert("Student created successfully!");
+      alert("Group created successfully!");
     } else {
       alert("Failed to create group.");
     }
@@ -502,7 +507,7 @@ function GroupForm({
           type="submit"
           className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
         >
-          Add Group
+          {initialData ? "Update Group" : "Add Group"}
         </button>
       </div>
     </form>
@@ -545,6 +550,8 @@ function Groups() {
   // ]);
 
   const [groups, setGroups] = useState([]);
+  const [selectedGroup, setselectedGroup] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   useEffect(() => {
     const getData = async () => {
@@ -590,6 +597,26 @@ function Groups() {
     return <LoadingSpinner />;
   }
 
+  const handleEditClick = (grp: Group) => {
+    setselectedGroup(grp);
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditGrp = (formData) => {
+    if (!selectedGroup) return;
+
+    const updatedgrps = groups?.map((g) =>
+      g.id === selectedGroup.id ? { ...g, ...formData } : g
+    );
+    setGroups(updatedgrps);
+  };
+
+  const grpsWithActions = groups?.map((g) => ({
+    ...g,
+    // onView: handleViewLevel,
+    onEdit: handleEditClick,
+  }));
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -604,7 +631,7 @@ function Groups() {
       <div className="bg-white rounded-lg shadow p-6">
         <DataTable
           columns={columns}
-          data={groups}
+          data={grpsWithActions}
           searchPlaceholder="Search groups..."
         />
       </div>
@@ -618,6 +645,20 @@ function Groups() {
           onSubmit={handleAddGroup}
           onClose={() => setIsModalOpen(false)}
         />
+      </Modal>
+
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        title="Update Group"
+      >
+        {selectedGroup && (
+          <GroupForm
+            onSubmit={handleEditGrp}
+            onClose={() => setIsEditModalOpen(false)}
+            initialData={selectedGroup}
+          />
+        )}
       </Modal>
     </div>
   );

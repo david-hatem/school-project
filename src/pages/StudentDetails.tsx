@@ -659,7 +659,7 @@ function StudentDetails() {
                 <div className="text-right">
                   <span
                     className={`px-2 py-1 rounded-full text-xs ${
-                      payment.statut_paiement.toLowerCase() === "paid"
+                      payment.statut_paiement === "PAID"
                         ? "bg-green-100 text-green-800"
                         : "bg-yellow-100 text-yellow-800"
                     }`}
