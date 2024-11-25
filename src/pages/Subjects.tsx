@@ -333,6 +333,10 @@ function Subjects() {
     return <LoadingSpinner />;
   }
 
+  useEffect(() => {
+    document.title = "Subjects";
+  }, []);
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">

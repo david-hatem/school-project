@@ -626,6 +626,10 @@ function Groups() {
     onEdit: handleEditClick,
   }));
 
+  useEffect(() => {
+    document.title = "Groups";
+  }, []);
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">

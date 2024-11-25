@@ -505,6 +505,10 @@ function Commissions() {
     exportNestedDataToExcel(filteredCommissions, "DATA.xlsx");
   };
 
+  useEffect(() => {
+    document.title = "Commissions";
+  }, []);
+
   return (
     <>
       <div className="space-y-6 no-print">

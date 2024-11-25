@@ -323,6 +323,10 @@ function Branches() {
     return <LoadingSpinner />;
   }
 
+  useEffect(() => {
+    document.title = "Branches";
+  }, []);
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">

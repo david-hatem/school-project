@@ -336,7 +336,9 @@ function Teachers() {
   if (isLoading) {
     return <LoadingSpinner />;
   }
-
+  useEffect(() => {
+    document.title = "Teachers";
+  }, []);
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">

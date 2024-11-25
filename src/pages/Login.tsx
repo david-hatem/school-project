@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 // import { useAuth } from "../contexts/AuthContext";
 import { LogIn } from "lucide-react";
@@ -66,6 +66,10 @@ function Login() {
   //     setIsLoading(false);
   //   }
   // };
+
+  useEffect(() => {
+    document.title = "Sign in";
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">

@@ -371,7 +371,9 @@ function Payments() {
   if (isLoading) {
     return <LoadingSpinner />;
   }
-
+  useEffect(() => {
+    document.title = "Payments";
+  }, []);
   return (
     <>
       <div className="space-y-6">
