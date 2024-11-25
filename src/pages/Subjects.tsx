@@ -7,63 +7,7 @@ import { Eye, Edit, Trash2Icon } from "lucide-react";
 import type { Subject } from "../types";
 import { createSub, updateSub } from "../services/api";
 import axios from "axios";
-
-const columns: ColumnDef<Subject>[] = [
-  {
-    header: "Subject Name",
-    accessorKey: "nom_matiere",
-    cell: ({ row }) => (
-      <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-        {row.original.nom_matiere}
-      </span>
-    ),
-  },
-  {
-    header: "Description",
-    accessorKey: "description",
-  },
-  {
-    header: "Created At",
-    accessorKey: "created_at",
-    cell: ({ row }) => new Date(row.original.created_at).toLocaleDateString(),
-  },
-  {
-    header: "Actions",
-    id: "actions",
-    cell: ({ row }) => (
-      <div className="flex space-x-2">
-        <button
-          onClick={() => row.original.onView?.(row.original)}
-          className="p-1 text-blue-600 hover:text-blue-800"
-        >
-          <Eye className="w-4 h-4" />
-        </button>
-        <button
-          onClick={() => row.original.onEdit?.(row.original)}
-          className="p-1 text-gray-600 hover:text-gray-800"
-        >
-          <Edit className="w-4 h-4" />
-        </button>
-        <button
-          // onClick={() => row.original.onEdit?.(row.original)}
-          onClick={async () => {
-            await axios.delete(
-              `http://167.114.0.177:81/matieres/delete/${row.original?.id}/`,
-              {
-                headers: {
-                  "Content-Type": "application/json", // Define content type as JSON
-                },
-              }
-            );
-          }}
-          className="p-1 text-gray-600 hover:text-gray-800"
-        >
-          <Trash2Icon className="w-4 h-4" />
-        </button>
-      </div>
-    ),
-  },
-];
+import ConfirmationDialog from "../components/ConfirmationDialog";
 
 const data: Subject[] = [
   {
@@ -266,6 +210,71 @@ function Subjects() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
   const [subjects, setSubjects] = useState([]);
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const columns: ColumnDef<Subject>[] = [
+    {
+      header: "Subject Name",
+      accessorKey: "nom_matiere",
+      cell: ({ row }) => (
+        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+          {row.original.nom_matiere}
+        </span>
+      ),
+    },
+    {
+      header: "Description",
+      accessorKey: "description",
+    },
+    {
+      header: "Created At",
+      accessorKey: "created_at",
+      cell: ({ row }) => new Date(row.original.created_at).toLocaleDateString(),
+    },
+    {
+      header: "Actions",
+      id: "actions",
+      cell: ({ row }) => (
+        <div className="flex space-x-2">
+          <button
+            onClick={() => row.original.onView?.(row.original)}
+            className="p-1 text-blue-600 hover:text-blue-800"
+          >
+            <Eye className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => row.original.onEdit?.(row.original)}
+            className="p-1 text-gray-600 hover:text-gray-800"
+          >
+            <Edit className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => setIsDialogOpen(true)}
+            className="p-1 text-gray-600 hover:text-gray-800"
+          >
+            <Trash2Icon className="w-4 h-4" />
+          </button>
+          <ConfirmationDialog
+            isOpen={isDialogOpen}
+            onConfirm={async () => {
+              await axios.delete(
+                `http://167.114.0.177:81/matieres/delete/${row.original?.id}/`,
+                {
+                  headers: {
+                    "Content-Type": "application/json", // Define content type as JSON
+                  },
+                }
+              );
+              setIsDialogOpen(false);
+            }}
+            onCancel={() => setIsDialogOpen(false)}
+            message="Do you really want to delete."
+          />
+        </div>
+      ),
+    },
+  ];
 
   useEffect(() => {
     // Fetch data from the API

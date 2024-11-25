@@ -8,81 +8,7 @@ import { Eye, Edit, Trash2Icon } from "lucide-react";
 import type { Teacher } from "../types";
 import { createTeacher } from "../services/api";
 import axios from "axios";
-
-const columns: ColumnDef<Teacher>[] = [
-  {
-    header: "First Name",
-    accessorKey: "prenom",
-  },
-  {
-    header: "Last Name",
-    accessorKey: "nom",
-  },
-  {
-    header: "Specialty",
-    accessorKey: "specialite",
-    cell: ({ row }) => (
-      <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-        {row.original.specialite}
-      </span>
-    ),
-  },
-  {
-    header: "Birth Date",
-    accessorKey: "date_naissance",
-    cell: ({ row }) =>
-      new Date(row.original.date_naissance).toLocaleDateString(),
-  },
-  {
-    header: "Phone",
-    accessorKey: "telephone",
-  },
-  {
-    header: "Gender",
-    accessorKey: "sexe",
-    cell: ({ row }) => (
-      <span
-        className={`px-2 py-1 rounded-full text-xs ${
-          row.original.sexe === "M"
-            ? "bg-blue-100 text-blue-800"
-            : "bg-pink-100 text-pink-800"
-        }`}
-      >
-        {row.original.sexe === "M" ? "Male" : "Female"}
-      </span>
-    ),
-  },
-  {
-    header: "Actions",
-    id: "actions",
-    cell: ({ row }) => (
-      <div className="flex space-x-2">
-        <button
-          onClick={() => row.original.onView?.(row.original)}
-          className="p-1 text-blue-600 hover:text-blue-800"
-        >
-          <Eye className="w-4 h-4" />
-        </button>
-        <button
-          // onClick={() => row.original.onEdit?.(row.original)}
-          onClick={async () => {
-            await axios.delete(
-              `http://167.114.0.177:81/professeurs/delete/${row.original?.id}/`,
-              {
-                headers: {
-                  "Content-Type": "application/json", // Define content type as JSON
-                },
-              }
-            );
-          }}
-          className="p-1 text-gray-600 hover:text-gray-800"
-        >
-          <Trash2Icon className="w-4 h-4" />
-        </button>
-      </div>
-    ),
-  },
-];
+import ConfirmationDialog from "../components/ConfirmationDialog";
 
 const data: Teacher[] = [
   {
@@ -286,6 +212,89 @@ function Teachers() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [teachers, setTeachers] = useState([]);
   const navigate = useNavigate();
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const columns: ColumnDef<Teacher>[] = [
+    {
+      header: "First Name",
+      accessorKey: "prenom",
+    },
+    {
+      header: "Last Name",
+      accessorKey: "nom",
+    },
+    {
+      header: "Specialty",
+      accessorKey: "specialite",
+      cell: ({ row }) => (
+        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+          {row.original.specialite}
+        </span>
+      ),
+    },
+    {
+      header: "Birth Date",
+      accessorKey: "date_naissance",
+      cell: ({ row }) =>
+        new Date(row.original.date_naissance).toLocaleDateString(),
+    },
+    {
+      header: "Phone",
+      accessorKey: "telephone",
+    },
+    {
+      header: "Gender",
+      accessorKey: "sexe",
+      cell: ({ row }) => (
+        <span
+          className={`px-2 py-1 rounded-full text-xs ${
+            row.original.sexe === "M"
+              ? "bg-blue-100 text-blue-800"
+              : "bg-pink-100 text-pink-800"
+          }`}
+        >
+          {row.original.sexe === "M" ? "Male" : "Female"}
+        </span>
+      ),
+    },
+    {
+      header: "Actions",
+      id: "actions",
+      cell: ({ row }) => (
+        <div className="flex space-x-2">
+          <button
+            onClick={() => row.original.onView?.(row.original)}
+            className="p-1 text-blue-600 hover:text-blue-800"
+          >
+            <Eye className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => setIsDialogOpen(true)}
+            className="p-1 text-gray-600 hover:text-gray-800"
+          >
+            <Trash2Icon className="w-4 h-4" />
+          </button>
+          <ConfirmationDialog
+            isOpen={isDialogOpen}
+            onConfirm={async () => {
+              await axios.delete(
+                `http://167.114.0.177:81/professeurs/delete/${row.original?.id}/`,
+                {
+                  headers: {
+                    "Content-Type": "application/json", // Define content type as JSON
+                  },
+                }
+              );
+              setIsDialogOpen(false);
+            }}
+            onCancel={() => setIsDialogOpen(false)}
+            message="Do you really want to delete."
+          />
+        </div>
+      ),
+    },
+  ];
 
   useEffect(() => {
     // Fetch data from the API

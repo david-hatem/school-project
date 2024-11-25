@@ -14,136 +14,7 @@ import createGroup, {
   fetchTeachersList,
   updateGroup,
 } from "../services/api";
-
-const columns: ColumnDef<Group>[] = [
-  {
-    header: "Group Name",
-    accessorKey: "nom_groupe",
-    cell: ({ row }) => (
-      <div>
-        <span className="font-medium text-blue-600 block">
-          {row.original.nom_groupe}
-        </span>
-        <span className="text-xs text-gray-500">
-          Created {new Date(row.original.created_at).toLocaleDateString()}
-        </span>
-      </div>
-    ),
-  },
-  {
-    header: "Level & Branch",
-    id: "level_branch",
-    cell: ({ row }) => (
-      <div className="space-y-1">
-        <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs block w-fit">
-          {row.original.niveau.nom_niveau}
-        </span>
-        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs block w-fit">
-          {row.original.filiere.nom_filiere}
-        </span>
-      </div>
-    ),
-  },
-  {
-    header: "Subscription Price",
-    accessorKey: "prix_subscription",
-    cell: ({ row }) => (
-      <span className="font-medium text-green-600">
-        ${row.original.prix_subscription?.toLocaleString() || 0}
-      </span>
-    ),
-  },
-  {
-    header: "Capacity",
-    id: "capacity",
-    cell: ({ row }) => (
-      <div className="space-y-1">
-        <div className="flex items-center space-x-1">
-          <Users className="w-4 h-4 text-gray-500" />
-          <span className="text-sm font-medium">
-            {row.original.max_etudiants}
-          </span>
-        </div>
-        <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
-          Max Students
-        </span>
-      </div>
-    ),
-  },
-  {
-    header: "Teachers & Commissions",
-    id: "teachers",
-    cell: ({ row }) => (
-      <div className="space-y-2">
-        {row.original.professeurs.map((prof) => (
-          <div
-            key={prof.id}
-            className="flex items-center justify-between text-sm border-b pb-1 last:border-0"
-          >
-            <span className="font-medium">
-              {prof.prenom} {prof.nom}
-            </span>
-            <span className="text-green-600 font-medium">
-              ${prof.commission_fixe}
-            </span>
-          </div>
-        ))}
-      </div>
-    ),
-  },
-  {
-    header: "Subjects",
-    accessorKey: "matieres",
-    cell: ({ row }) => (
-      <div className="flex flex-wrap gap-1">
-        {row.original.matieres.map((subject) => (
-          <span
-            key={subject.id}
-            className="inline-block px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs"
-          >
-            {subject.nom_matiere}
-          </span>
-        ))}
-      </div>
-    ),
-  },
-  {
-    header: "Actions",
-    id: "actions",
-    cell: ({ row }) => (
-      <div className="flex space-x-2">
-        {/* <button
-          onClick={() => row.original.onView?.(row.original)}
-          className="p-1 text-blue-600 hover:text-blue-800"
-        >
-          <Eye className="w-4 h-4" />
-        </button> */}
-        <button
-          onClick={() => row.original?.onEdit?.(row.original)}
-          className="p-1 text-gray-600 hover:text-gray-800"
-        >
-          <Edit className="w-4 h-4" />
-        </button>
-        <button
-          // onClick={() => row.original.onEdit?.(row.original)}
-          onClick={async () => {
-            await axios.delete(
-              `http://167.114.0.177:81/groupes/delete/${row.original?.id}/`,
-              {
-                headers: {
-                  "Content-Type": "application/json", // Define content type as JSON
-                },
-              }
-            );
-          }}
-          className="p-1 text-gray-600 hover:text-gray-800"
-        >
-          <Trash2Icon className="w-4 h-4" />
-        </button>
-      </div>
-    ),
-  },
-];
+import ConfirmationDialog from "../components/ConfirmationDialog";
 
 interface GroupFormData {
   nom_groupe: string;
@@ -552,6 +423,144 @@ function Groups() {
   const [groups, setGroups] = useState([]);
   const [selectedGroup, setselectedGroup] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const columns: ColumnDef<Group>[] = [
+    {
+      header: "Group Name",
+      accessorKey: "nom_groupe",
+      cell: ({ row }) => (
+        <div>
+          <span className="font-medium text-blue-600 block">
+            {row.original.nom_groupe}
+          </span>
+          <span className="text-xs text-gray-500">
+            Created {new Date(row.original.created_at).toLocaleDateString()}
+          </span>
+        </div>
+      ),
+    },
+    {
+      header: "Level & Branch",
+      id: "level_branch",
+      cell: ({ row }) => (
+        <div className="space-y-1">
+          <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs block w-fit">
+            {row.original.niveau.nom_niveau}
+          </span>
+          <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs block w-fit">
+            {row.original.filiere.nom_filiere}
+          </span>
+        </div>
+      ),
+    },
+    {
+      header: "Subscription Price",
+      accessorKey: "prix_subscription",
+      cell: ({ row }) => (
+        <span className="font-medium text-green-600">
+          ${row.original.prix_subscription?.toLocaleString() || 0}
+        </span>
+      ),
+    },
+    {
+      header: "Capacity",
+      id: "capacity",
+      cell: ({ row }) => (
+        <div className="space-y-1">
+          <div className="flex items-center space-x-1">
+            <Users className="w-4 h-4 text-gray-500" />
+            <span className="text-sm font-medium">
+              {row.original.max_etudiants}
+            </span>
+          </div>
+          <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
+            Max Students
+          </span>
+        </div>
+      ),
+    },
+    {
+      header: "Teachers & Commissions",
+      id: "teachers",
+      cell: ({ row }) => (
+        <div className="space-y-2">
+          {row.original.professeurs.map((prof) => (
+            <div
+              key={prof.id}
+              className="flex items-center justify-between text-sm border-b pb-1 last:border-0"
+            >
+              <span className="font-medium">
+                {prof.prenom} {prof.nom}
+              </span>
+              <span className="text-green-600 font-medium">
+                ${prof.commission_fixe}
+              </span>
+            </div>
+          ))}
+        </div>
+      ),
+    },
+    {
+      header: "Subjects",
+      accessorKey: "matieres",
+      cell: ({ row }) => (
+        <div className="flex flex-wrap gap-1">
+          {row.original.matieres.map((subject) => (
+            <span
+              key={subject.id}
+              className="inline-block px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs"
+            >
+              {subject.nom_matiere}
+            </span>
+          ))}
+        </div>
+      ),
+    },
+    {
+      header: "Actions",
+      id: "actions",
+      cell: ({ row }) => (
+        <div className="flex space-x-2">
+          {/* <button
+            onClick={() => row.original.onView?.(row.original)}
+            className="p-1 text-blue-600 hover:text-blue-800"
+          >
+            <Eye className="w-4 h-4" />
+          </button> */}
+          <button
+            onClick={() => row.original?.onEdit?.(row.original)}
+            className="p-1 text-gray-600 hover:text-gray-800"
+          >
+            <Edit className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => setIsDialogOpen(true)}
+            className="p-1 text-gray-600 hover:text-gray-800"
+          >
+            <Trash2Icon className="w-4 h-4" />
+          </button>
+          <ConfirmationDialog
+            isOpen={isDialogOpen}
+            onConfirm={async () => {
+              await axios.delete(
+                `http://167.114.0.177:81/groupes/delete/${row.original?.id}/`,
+                {
+                  headers: {
+                    "Content-Type": "application/json", // Define content type as JSON
+                  },
+                }
+              );
+              setIsDialogOpen(false);
+            }}
+            onCancel={() => setIsDialogOpen(false)}
+            message="Do you really want to delete."
+          />
+        </div>
+      ),
+    },
+  ];
 
   useEffect(() => {
     const getData = async () => {
